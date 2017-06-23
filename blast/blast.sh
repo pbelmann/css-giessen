@@ -8,4 +8,4 @@ fi
 
 mkdir -p ${1}/results
 
-docker run -v ${1}:/data -v ${2}:/db biocontainers/blast blastp -query ${4}.${SGE_TASK_ID} -db /db/zebrafish.1.protein.faa --out results/result.txt.${SGE_TASK_ID}
+docker run -v ${1}:/data -v ${2}:/db biocontainers/blast blastp -query ${4}.${SGE_TASK_ID} -db /db/zebrafish.1.protein.faa -out results/result.txt.${SGE_TASK_ID}
