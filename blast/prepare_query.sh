@@ -3,7 +3,7 @@
 SWIFT_CSS=https://s3.computational.bio.uni-giessen.de/swift/v1/CSS
 
 if [ x = ${1}x ]; then
-	echo "usage: ${0} <targetdir" 1>&2
+	echo "usage: ${0} <targetdir>" 1>&2
        	exit 1
 fi;
 
