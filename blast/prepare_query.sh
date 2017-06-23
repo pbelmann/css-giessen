@@ -12,7 +12,7 @@ if [ ! -d  ${1} ]; then
 fi
 
 cd ${1}
-curl ${SWIFt_CSS}/uniprot_sprot.fasta.gz > uniprot_sprot.fasta.gz
+curl ${SWIFT_CSS}/uniprot_sprot.fasta.gz > uniprot_sprot.fasta.gz
 gunzip uniprot_sprot.fasta.gz
 /vol/spool/css-giessen/scripts/split_fasta uniprot_sprot.fasta 5000
 
