@@ -8,6 +8,9 @@ fi
 if [ ! -d ${1} ]; then
 	mkdir -p ${1}
 fi
+echo ${1}
+
+
 curl ${SWIFT_CSS}/zebrafish.1.protein.faa.gz > ${1}/zebrafish.1.protein.faa.gz
 gunzip zebrafish.1.protein.faa.gz
-docker run -v ${1}:/data makeblastdb -in zebrafish.1.protein.faa -dbtype prot
+docker run -v ${1}:/data biocontainers/blast makeblastdb -in zebrafish.1.protein.faa -dbtype prot
