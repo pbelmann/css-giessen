@@ -55,7 +55,7 @@ The idea is to start one blastp job for each input file. We have to write a shel
 	-db zebrafish.1.protein.faa \
 	-out /output/result.txt.${SGE_TASK_ID}
 	
-The environment variable ${SGE\_TASK\_ID} is set by the gridengine when run an arrayjob. Let's  submit the first 100 queries as array job:
+The environment variable ${SGE\_TASK\_ID} is set by the gridengine when run an arrayjob. Let's  submit the first 100 parts as array job:
 
 	qsub -cwd -t 1-100 blastp.sh
 
