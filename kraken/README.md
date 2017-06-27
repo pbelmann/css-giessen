@@ -48,13 +48,17 @@ For the kraken analysis we have to write a shell script `kraken_pipline.sh` that
   	
 3. Create Kraken report.
 
-Test the script with **one(!)** fastq file.
+Test the script with **one(!)** fastq file, e.g. :
 
-	qsub -pe multislot 16 kraken_pipeline.sh SRS014475 SRS014475.report
+	qsub -pe multislot 16 kraken_pipeline.sh kraken/SRS014475.fastq.gz SRS014475.report
 
 If the test was  sucessfull run kraken on all fastq files.
 
-	for 
+	SEQ_FILES=$(curl -s https://s3.computational.bio.uni-giessen.de/swift/v1/CSS/ | grep fastq.gz)
+	for SF in ${SEQ_FILES}; do \
+		SRS_NR = $(echo $SF | cut -f 2 -d '/' | cut -f 1 -d '.' ) \
+		qsub -pe multislot 16 kraken_pipeline.sh $SF $SRS_NR.report \
+	done 	
     
 ### Generate Krona plot
 
@@ -65,12 +69,12 @@ We now use [Krona](https://github.com/marbl/Krona/wiki) to get a nice visualitat
 Since all reports files located on a shared filesystem, Krona can be run directly on the master. We have to merge all kraken-reports ...
 
     cd /vol/spool/kraken
-    for i in *out; do cut -f2,3 $i > $i.krona; done
+    for i in *.report; do cut -f2,3 $i > $i.krona; done
     
 ... run krona ... 
     
     
-    ktImportTaxonomy *krona -o krona.html
+    docker run -v /vol/spool/kraken:/data ... ktImportTaxonomy /data/*.krona -o /data/krona.html
     
 ... and move the results.
 

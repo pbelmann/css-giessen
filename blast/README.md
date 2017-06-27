@@ -13,7 +13,7 @@ We need to create the BlastDB database on the local storage (/vol/scratch) on ea
 First we have to download the zebrafish database from cloud object storage URL and uncompress it.
  
 	
-	curl https://s3.computational.bio.uni-giessen.de/swift/v1/CSS//zebrafish.1.protein.faa.gz > /vol/scratch/zebrafish.1.protein.faa.gz
+	curl https://s3.computational.bio.uni-giessen.de/swift/v1/CSS/blast/zebrafish.1.protein.faa.gz > /vol/scratch/zebrafish.1.protein.faa.gz
 	gunzip /vol/scratch/zebrafish.1.protein.faa.gz
 	
 Then we need to prepare the zebrafish database with `makeblastdb` for the search.
@@ -36,12 +36,12 @@ The above qsub command asumes that we started a cluster with 4 compute nodes (16
 
 We download a set query sequences from cloud object storage and ...
 
-	curl https://s3.computational.bio.uni-giessen.de/swift/v1/CSS/queries.fas.gz > /vol/spool/blast/query.fas.gz
+	curl https://s3.computational.bio.uni-giessen.de/swift/v1/CSS/blast/queries.fas.gz > /vol/spool/blast/query.fas.gz
 	
-... split the multiple fasta file into smaller pieces (e.g. 100 sequences each). We can use the split_fasta script located in the scripts folder.
+... split the multiple fasta file into smaller pieces (e.g. 10 sequences each). We can use the split_fasta script located in the scripts folder.
 
 	gunzip /vol/spool/blast/query.fas.gz
-	split_fasta query.fas 100
+	split_fasta query.fas 10
 	
 ## Run BlastP analysis
 The idea is to start one blastp job for each input file. We have to write a shell script ("blastp.sh") that wraps the docker call of the blastp container and can be submitted to the gridengine as arrayjob. Blastp needs the database (located in /vol/scratch), the query files (located in /vol/spool/blast) and a result folder. Blastp expects the database to be in the search path so the database path must be mounted as /data. 
