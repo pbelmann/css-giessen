@@ -28,7 +28,7 @@ cluster. The `-pe` option ensures, that you only download the
 database **once on each host**.
 
    
-	qsub -cwd -t 1-4 -pe multislot 16 /vol/spool/blastdb.sh
+	qsub -cwd -t 1-5 -pe multislot 16 /vol/spool/blastdb.sh
 	
 The above qsub command asumes that we started a cluster with 4 compute nodes (16 cores each). A ready-to-use script is located in this repository as **get\_and\_create\_zebrafish\_db.sh**.
    
@@ -36,12 +36,12 @@ The above qsub command asumes that we started a cluster with 4 compute nodes (16
 
 We download a set query sequences from cloud object storage and ...
 
-	curl https://s3.computational.bio.uni-giessen.de/swift/v1/CSS/blast/queries.fas.gz > /vol/spool/blast/query.fas.gz
+	curl https://s3.computational.bio.uni-giessen.de/swift/v1/CSS/blast/query.fas.gz > /vol/spool/blast/query.fas.gz
 	
 ... split the multiple fasta file into smaller pieces (e.g. 10 sequences each). We can use the split_fasta script located in the scripts folder.
 
 	gunzip /vol/spool/blast/query.fas.gz
-	split_fasta query.fas 10
+	split_fasta query.fas 50
 	
 ## Run BlastP analysis
 The idea is to start one blastp job for each input file. We have to write a shell script ("blastp.sh") that wraps the docker call of the blastp container and can be submitted to the gridengine as arrayjob. Blastp needs the database (located in /vol/scratch), the query files (located in /vol/spool/blast) and a result folder. Blastp expects the database to be in the search path so the database path must be mounted as /data. 
@@ -55,7 +55,10 @@ The idea is to start one blastp job for each input file. We have to write a shel
 	-db zebrafish.1.protein.faa \
 	-out /output/result.txt.${SGE_TASK_ID}
 	
-The environment variable ${SGE\_TASK\_ID} is set by the gridengine when run an arrayjob.
+The environment variable ${SGE\_TASK\_ID} is set by the gridengine when run an arrayjob. Let's  submit the first 100 queries as array job:
+
+	qsub -cwd -t 1-100 blastp.sh
+
 
 
 
