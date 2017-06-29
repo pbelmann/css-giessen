@@ -5,7 +5,7 @@ Introduction ... **TBW** ..
 https://ccb.jhu.edu/software/kraken/
 
 ## Prerequites
-We assume that a bibigrid cluster ( master + 5 worker nodes - 16 cores each) with a configured GridEngine (GE) is running.   
+We assume that a bibigrid cluster ( master + 4 worker nodes - 16 cores each) with a configured GridEngine (GE) is running.   
 
 *Hint: The cloud users homedir* ***is not shared*** *between master and host. Any outputs from GE jobs are stored in users homedir as default. It is often a good idea to change this default behavior. We could change the environment setting of the GridEngine or just use the -cwd (Currrent Working Directory) argument and change into a shared fs before*
 
@@ -18,7 +18,7 @@ We assume that a bibigrid cluster ( master + 5 worker nodes - 16 cores each) wit
 [BioContainers](http://biocontainers.pro) is an open source container framework for bioinformatic software. We search BioContainers registry for a suitable Kraken container and write a small shell script that downloads the container once on each compute host. We can use the SGE to distribute the jobs on the
 cluster. The `-pe` option ensures, that we call the script only  **once on each host**.
 
-	qsub -cwd -t 1-5 -pe multislot 16 docker pull ...
+	qsub -cwd -t 1-4 -pe multislot 16 -b y docker pull ...
 	
 *This step seems to be unneccessary, because docker pulls a container if it isn't locally available. However, separate this step from rest of pipeline can speed up a analysis in the case you run more than one job in parallel on one host.*
 
@@ -27,11 +27,11 @@ cluster. The `-pe` option ensures, that we call the script only  **once on each 
 ### Download Kraken Database
 
 First we need to download the Kraken database to each of
-the hosts. A copy (for faster download) of the [minikraken-db](https://ccb.jhu.edu/software/kraken/dl/minikraken.tgz) is located during the CSS in the [object storage](https://s3.computational.bio.uni-giessen.de/swift/v1/CSS/minikraken.tgz). For usage with Kraken the database must decompressed before usage. Implement both actions in a shell script named `kraken_download_db.sh`. 
+the hosts. A copy (for faster download) of the [minikraken-db](https://ccb.jhu.edu/software/kraken/dl/minikraken.tgz) is located during the CSS in the [object storage](https://s3.computational.bio.uni-giessen.de/swift/v1/CSS/) (use `wget` or `curl` for download). For usage with Kraken the database must decompressed before usage. Implement both actions in a shell script named `kraken_download_db.sh`. 
 
 We again use the GridEngine to distribute the script on all slave hosts.
 
-	qsub -cwd -t 1-5 -pe multislot 16 kraken_download_db.sh
+	qsub -cwd -t 1-4 -pe multislot 16 kraken_download_db.sh
 
 
 ### Run Kraken Analysis
@@ -43,21 +43,21 @@ For the kraken analysis we have to write a shell script `kraken_pipline.sh` that
 	- Use `wget` or `curl`  to download them to local storage (`/vol/scratch`)
 	
 2. Run Kraken.
- - FastQ files are compressed (gzip)
+ - FastQ files are compressed (gzip) : --fastq-input, --gzip-compressed
  - mount input data and database path into the container
   	
 3. Create Kraken report.
 
 Test the script with **one(!)** fastq file, e.g. :
 
-	qsub -pe multislot 16 kraken_pipeline.sh kraken/SRS014475.fastq.gz SRS014475.report
+	qsub -cwd -pe multislot 16 kraken_pipeline.sh kraken/SRS014575.fastq.gz SRS014575.report
 
 If the test was  sucessfull run kraken on all fastq files.
 
 	SEQ_FILES=$(curl -s https://s3.computational.bio.uni-giessen.de/swift/v1/CSS/ | grep fastq.gz)
-	for SF in ${SEQ_FILES}; do \
-		SRS_NR = $(echo $SF | cut -f 2 -d '/' | cut -f 1 -d '.' ) \
-		qsub -pe multislot 16 kraken_pipeline.sh $SF $SRS_NR.report \
+	for SF in ${SEQ_FILES}; do 
+		SRS_NR=$(echo $SF | cut -f 2 -d '/' | cut -f 1 -d '.' ); 
+		qsub -cwd -pe multislot 16 kraken_pipeline.sh $SF $SRS_NR.report ; 
 	done 	
     
 ### Generate Krona plot
