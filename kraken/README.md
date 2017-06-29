@@ -1,12 +1,13 @@
 # Docker-Kraken
 
-Introduction ... **TBW** ..
+We want to use [Kraken](https://ccb.jhu.edu/software/kraken/) to analyze some FASTQ file from the [Human Microbiome Project](http://hmpdacc.org) and use [Krona](https://github.com/marbl/Krona/wiki) to visualize the results. 
 
-https://ccb.jhu.edu/software/kraken/
+
 
 ## Prerequites
-We assume that a bibigrid cluster ( master + 4 worker nodes - 16 cores each) with a configured GridEngine (GE) is running.   
+We assume that a bibigrid cluster ( master - 32 cores + 4 worker nodes - 16 cores each) with a configured GridEngine (GE) is already running.
 
+   	
 *Hint: The cloud users homedir* ***is not shared*** *between master and host. Any outputs from GE jobs are stored in users homedir as default. It is often a good idea to change this default behavior. We could change the environment setting of the GridEngine or just use the -cwd (Currrent Working Directory) argument and change into a shared fs before*
 
 	cd /vol/spool/log
@@ -15,7 +16,7 @@ We assume that a bibigrid cluster ( master + 4 worker nodes - 16 cores each) wit
 
 ## Kraken Docker Image
 
-[BioContainers](http://biocontainers.pro) is an open source container framework for bioinformatic software. We search BioContainers registry for a suitable Kraken container and write a small shell script that downloads the container once on each compute host. We can use the SGE to distribute the jobs on the
+[BioContainers](http://biocontainers.pro) is an open source container framework for bioinformatic software. We search BioContainers registry for a suitable Kraken container and write a small shell script that downloads the container once on each compute host. We can use the GE to distribute the jobs on the
 cluster. The `-pe` option ensures, that we call the script only  **once on each host**.
 
 	qsub -cwd -t 1-4 -pe multislot 16 -b y docker pull ...
@@ -43,14 +44,14 @@ For the kraken analysis we have to write a shell script `kraken_pipline.sh` that
 	- Use `wget` or `curl`  to download them to local storage (`/vol/scratch`)
 	
 2. Run Kraken.
- - FastQ files are compressed (gzip) : --fastq-input, --gzip-compressed
+ - FastQ files are compressed (gzip) : `--fastq-input`, `--gzip-compressed`
  - mount input data and database path into the container
   	
 3. Create Kraken report.
 
-Test the script with **one(!)** fastq file, e.g. :
+Test the script with **one(!)** fastq file on the master instance, e.g. :
 
-	qsub -cwd -pe multislot 16 kraken_pipeline.sh kraken/SRS014575.fastq.gz SRS014575.report
+	kraken_pipeline.sh kraken/SRS014575.fastq.gz SRS014575.report
 
 If the test was  sucessfull run kraken on all fastq files.
 
@@ -64,19 +65,27 @@ If the test was  sucessfull run kraken on all fastq files.
 
 We now use [Krona](https://github.com/marbl/Krona/wiki) to get a nice visualitation of our results. Again search for a suitable container containing the Krona software suite or build a Krona container by yourself, the hands-on repository contains a suitable Dockerfile.
 
-***Attention: Unfortuneatly the krona container offered by `biocontainers.pro` does not come with a preinstalled taxonomy database and the contained updateTaxonomy.sh script breaks because of a missing dependency (curl)***
+***Attention: Unfortuneatly the krona container offered by `biocontainers.pro` does not come with a preinstalled taxonomy database and the contained updateTaxonomy.sh script breaks because of a missing dependency (curl).***
 
+### Build Krona container
+
+	git clone https://github.com/jkrue/css-giessen.git
+	cd css-giessen/kraken
+	docker build -t krona .
+
+
+### Merge all report files
 Since all reports files located on a shared filesystem, Krona can be run directly on the master. We have to merge all kraken-reports ...
 
     cd /vol/spool/kraken
     for i in *.report; do cut -f2,3 $i > $i.krona; done
     
-... run krona ... 
+### Run krona  
     
+    cd /vol/spool/kraken
+    docker run -u 1000:1000 -v /vol/spool/kraken:/data ... ktImportTaxonomy *.krona -o krona.html
     
-    docker run -v /vol/spool/kraken:/data ... ktImportTaxonomy /data/*.krona -o /data/krona.html
-    
-... and move the results.
+### View the results
 
      mv krona.html* /vol/spool/www
     
