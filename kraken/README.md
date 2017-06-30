@@ -4,7 +4,7 @@ We want to use [Kraken](https://ccb.jhu.edu/software/kraken/) to analyze some FA
 
 
 
-## Prerequites
+## Prerequisites
 We assume that a bibigrid cluster ( master - 32 cores + 4 worker nodes - 16 cores each) with a configured GridEngine (GE) is already running.
 
    	
