@@ -56,12 +56,14 @@ For the kraken analysis we have to use a shell script `kraken_pipline.sh` that s
   	
 3. Create Kraken report.
 
-	SEQ_FILES=$(curl -s https://openstack.cebitec.uni-bielefeld.de:8080/swift/v1/eMed/ | grep tar.bz2 )
-	for SF in ${SEQ_FILES}; do 
-		SRS_NR=$(echo $SF | cut -f 2 -d '/' | cut -f 1 -d '.' ); 
-		qsub -pe multislot 16 kraken_pipeline.sh $SF $SRS_NR.report ; 
-	done 	
-    
+~~~BASH
+SEQ_FILES=$(curl -s https://openstack.cebitec.uni-bielefeld.de:8080/swift/v1/eMed/ | grep tar.bz2 )
+for SF in ${SEQ_FILES}; do 
+	SRS_NR=$(echo $SF | cut -f 2 -d '/' | cut -f 1 -d '.' ); 
+	qsub -pe multislot 16 kraken_pipeline.sh $SF $SRS_NR.report ; 
+done 	
+~~~    
+
 ### Generate Krona plot
 
 We now use [Krona](https://github.com/marbl/Krona/wiki) to get a nice visualitation of our results. Again search for a suitable container containing the Krona software suite or build a Krona container by yourself, the hands-on repository contains a suitable Dockerfile.
