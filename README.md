@@ -30,6 +30,7 @@ cluster. The `-pe` option ensures, that we call the script only  **once on each 
 
 ### Download Kraken Database
 
+
 First we need to download the Kraken database to each of
 the hosts. For usage with Kraken the database must decompressed before usage. Both actions are implemented in a shell script named `kraken_download_db.sh`. 
 
@@ -37,10 +38,11 @@ We again use the GridEngine to distribute the script on all slave hosts.
 
 	qsub -cwd -t 1-4 -pe multislot 16 kraken_download_db.sh
 
-
 ![download kraken](figures/download_kraken_db.png)
 
 ### Run Kraken Analysis
+
+![kraken process](figures/process.png)
 
 For the kraken analysis we have use a shell script `kraken_pipline.sh` that should do the following :
 
@@ -59,12 +61,15 @@ for SF in ${SEQ_FILES}; do
 	SRS_NR=$(echo $SF | cut -f 2 -d '/' | cut -f 1 -d '.' ); 
 	qsub -cwd -pe multislot 16 kraken_pipeline.sh $SF $SRS_NR.report ; 
 done 	
+
     
 ### Generate Krona plot
 
 We now use [Krona](https://github.com/marbl/Krona/wiki) to get a nice visualitation of our results. Again search for a suitable container containing the Krona software suite or build a Krona container by yourself, the hands-on repository contains a suitable Dockerfile.
 
 ***Attention: Unfortuneatly the krona container offered by `biocontainers.pro` does not come with a preinstalled taxonomy database and the contained updateTaxonomy.sh script breaks because of a missing dependency (curl).***
+
+![krona](figures/krona.png)
 
 ### Build Krona container
 
