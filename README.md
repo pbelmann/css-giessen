@@ -5,7 +5,7 @@ We want to use [Kraken](https://ccb.jhu.edu/software/kraken/) to analyze some FA
 
 
 ## Prerequisites
-We assume that a bibigrid cluster ( master - 8 cores + 4 worker nodes - 16 cores each) with a configured GridEngine (GE) is already running.
+We assume that a [bibigrid](https://github.com/BiBiServ/bibigrid) cluster ( master - 8 cores + 4 worker nodes - 16 cores each) with a configured GridEngine (GE) is already running.
 
    	
 *Hint: The cloud users homedir* ***is not shared*** *between master and host. Any outputs from GE jobs are stored in users homedir as default. It is often a good idea to change this default behavior. We could change the environment setting of the GridEngine or just use the -cwd (Currrent Working Directory) argument and change into a shared fs before*
@@ -31,6 +31,8 @@ cluster. The `-pe` option ensures, that we call the script only  **once on each 
 ### Download Kraken Database
 
 
+![download kraken](figures/download_kraken_db.png)
+
 First we need to download the Kraken database to each of
 the hosts. For usage with Kraken the database must decompressed before usage. Both actions are implemented in a shell script named `kraken_download_db.sh`. 
 
@@ -38,7 +40,6 @@ We again use the GridEngine to distribute the script on all slave hosts.
 
 	qsub -cwd -t 1-4 -pe multislot 16 kraken_download_db.sh
 
-![download kraken](figures/download_kraken_db.png)
 
 ### Run Kraken Analysis
 
