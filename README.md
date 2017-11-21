@@ -24,6 +24,8 @@ cluster. The `-pe` option ensures, that we call the script only  **once on each 
 	
 *This step seems to be unneccessary, because docker pulls a container if it isn't locally available. However, separate this step from rest of pipeline can speed up a analysis in the case you run more than one job in parallel on one host.*
 
+![download kraken](figures/kraken_tool.png)
+
 ## Running Kraken containers on the cluster nodes
 
 ### Download Kraken Database
@@ -34,6 +36,9 @@ the hosts. For usage with Kraken the database must decompressed before usage. Bo
 We again use the GridEngine to distribute the script on all slave hosts.
 
 	qsub -cwd -t 1-4 -pe multislot 16 kraken_download_db.sh
+
+
+![download kraken](figures/download_kraken_db.png)
 
 ### Run Kraken Analysis
 
