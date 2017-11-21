@@ -6,7 +6,10 @@ We want to use [Kraken](https://ccb.jhu.edu/software/kraken/) to analyze some FA
 We assume that a [bibigrid](https://github.com/BiBiServ/bibigrid) cluster ( master - 8 cores + 4 worker nodes - 16 cores each) with a configured GridEngine (GE) is already running.
 Please fetch this repository with
 
-	git clone https://github.com/pbelmann/eMed.git
+~~~BASH
+cd ~/
+git clone https://github.com/pbelmann/eMed.git
+~~~
    	
 *Hint: The cloud users homedir* ***is not shared*** *between master and host. Any outputs from GE jobs are stored in users homedir as default. It is often a good idea to change this default behavior. We could change the environment setting of the GridEngine or just use the -cwd (Currrent Working Directory) argument and change into a shared fs before*
 
@@ -38,7 +41,10 @@ the hosts. For usage with Kraken the database must decompressed before usage. Bo
 
 We again use the GridEngine to distribute the script on all slave hosts.
 
-	qsub -t 1-4 -pe multislot 16 kraken_download_db.sh
+~~~BASH
+cd ~/eMed
+qsub -t 1-4 -pe multislot 16 kraken_download_db.sh
+~~~
 
 ### Run Kraken Analysis
 
@@ -57,6 +63,7 @@ For the kraken analysis we have to use a shell script `kraken_pipline.sh` that s
 3. Create Kraken report.
 
 ~~~BASH
+cd ~/eMed
 SEQ_FILES=$(curl -s https://openstack.cebitec.uni-bielefeld.de:8080/swift/v1/eMed/ | grep tar.bz2 )
 for SF in ${SEQ_FILES}; do 
 	SRS_NR=$(echo $SF | cut -f 2 -d '/' | cut -f 1 -d '.' ); 
@@ -74,7 +81,7 @@ We now use [Krona](https://github.com/marbl/Krona/wiki) to get a nice visualitat
 
 ### Build Krona container
 
-	cd eMed
+	cd ~/eMed
 	docker build -t krona .
 
 ### Merge all report files
