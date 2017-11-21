@@ -31,8 +31,8 @@ wget -qO- "https://openstack.cebitec.uni-bielefeld.de:8080/swift/v1/eMed/${INFIL
 cd ${SPOOLDIR}
 
 #OUTFILE="${SPOOLDIR}/${OUTNAME}.out"
-REPORTFILE="${SPOOLDIR}/${OUTNAME}.report"
+REPORTFILE="${SPOOLDIR}/${OUTNAME}"
 
 ## run kraken
-echo "running kraken:"
-docker run -v "/vol/scratch:/vol/scratch"  -v "/vol/spool:/vol/spool" --entrypoint="/usr/local/bin/kraken" quay.io/biocontainers/kraken:1.0--pl5.22.0_0  kraken --db /vol/scratch/kraken_db  --fastq-input $OUTFILE  --output $REPORTFILE
+echo "running kraken: "
+docker run -u 1000:1000 -v "/vol/scratch:/vol/scratch:rw"  -v "/vol/spool:/vol/spool:rw" --entrypoint="/usr/local/bin/kraken" quay.io/biocontainers/kraken:1.0--pl5.22.0_0  --db /vol/scratch/kraken_db  --fastq-input $OUTFILE --output $REPORTFILE

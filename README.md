@@ -1,12 +1,12 @@
-# Docker-Kraken
+# eMed Docker-Kraken Demo
 
 We want to use [Kraken](https://ccb.jhu.edu/software/kraken/) to analyze some FASTQ files from the [Human Microbiome Project](http://hmpdacc.org) and use [Krona](https://github.com/marbl/Krona/wiki) to visualize the results. To makes the life easier we run ready-to-use dockerized versions of Kraken and Krona.
 
-
-
 ## Prerequisites
 We assume that a [bibigrid](https://github.com/BiBiServ/bibigrid) cluster ( master - 8 cores + 4 worker nodes - 16 cores each) with a configured GridEngine (GE) is already running.
+Please fetch this repository with
 
+	git clone https://github.com/pbelmann/eMed.git
    	
 *Hint: The cloud users homedir* ***is not shared*** *between master and host. Any outputs from GE jobs are stored in users homedir as default. It is often a good idea to change this default behavior. We could change the environment setting of the GridEngine or just use the -cwd (Currrent Working Directory) argument and change into a shared fs before*
 
@@ -40,29 +40,27 @@ We again use the GridEngine to distribute the script on all slave hosts.
 
 	qsub -t 1-4 -pe multislot 16 kraken_download_db.sh
 
-
 ### Run Kraken Analysis
 
 ![kraken process](figures/process.png)
 
-For the kraken analysis we have use a shell script `kraken_pipline.sh` that should do the following :
+For the kraken analysis we have to use a shell script `kraken_pipline.sh` that should do the following :
 
 1. Download FASTQ file.
 	- the object storage contains a set of fastq files.
-	- Use `wget` or `curl`  to download them to local storage (`/vol/scratch`)
+	- Use `wget`  to download them to local storage (`/vol/scratch`)
 	
 2. Run Kraken.
- - FastQ files are compressed (gzip) : `--fastq-input`, `--gzip-compressed`
+ - FastQ files are compressed (tar.bz2) : `--fastq-input`
  - mount input data and database path into the container
   	
 3. Create Kraken report.
 
-SEQ_FILES=$(curl -s https://openstack.cebitec.uni-bielefeld.de:8080/swift/v1/eMed/ | grep tar.bz2 )
-for SF in ${SEQ_FILES}; do 
-	SRS_NR=$(echo $SF | cut -f 2 -d '/' | cut -f 1 -d '.' ); 
-	qsub -pe multislot 16 kraken_pipeline.sh $SF $SRS_NR.report ; 
-done 	
-
+	SEQ_FILES=$(curl -s https://openstack.cebitec.uni-bielefeld.de:8080/swift/v1/eMed/ | grep tar.bz2 )
+	for SF in ${SEQ_FILES}; do 
+		SRS_NR=$(echo $SF | cut -f 2 -d '/' | cut -f 1 -d '.' ); 
+		qsub -pe multislot 16 kraken_pipeline.sh $SF $SRS_NR.report ; 
+	done 	
     
 ### Generate Krona plot
 
@@ -74,8 +72,7 @@ We now use [Krona](https://github.com/marbl/Krona/wiki) to get a nice visualitat
 
 ### Build Krona container
 
-	git clone https://github.com/jkrue/css-giessen.git
-	cd css-giessen/kraken
+	cd eMed
 	docker build -t krona .
 
 
@@ -83,7 +80,7 @@ We now use [Krona](https://github.com/marbl/Krona/wiki) to get a nice visualitat
 Since all reports files located on a shared filesystem, Krona can be run directly on the master. We have to merge all kraken-reports ...
 
     cd /vol/spool/kraken
-    for i in *.report.out; do cut -f2,3 $i > $i.krona; done
+    for i in *.report; do cut -f2,3 $i > $i.krona; done
     
 ### Run krona  
     
@@ -96,4 +93,4 @@ Since all reports files located on a shared filesystem, Krona can be run directl
     
 You can use your browser to look at the Krona output.
 
-     http://<BIBIGRID_MASTER_IP>/result/
+     http://<BIBIGRID_MASTER_IP>/result/krona.html
