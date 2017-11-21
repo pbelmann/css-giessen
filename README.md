@@ -75,7 +75,6 @@ We now use [Krona](https://github.com/marbl/Krona/wiki) to get a nice visualitat
 	cd eMed
 	docker build -t krona .
 
-
 ### Merge all report files
 Since all reports files located on a shared filesystem, Krona can be run directly on the master. We have to merge all kraken-reports ...
 
@@ -88,6 +87,8 @@ Since all reports files located on a shared filesystem, Krona can be run directl
     docker run -u 1000:1000 -v /vol/spool/kraken:/data krona ktImportTaxonomy *.krona -o krona.html
     
 ### View the results
+
+![krona](figures/krona_result.png)
 
      mv krona.html* /vol/spool/www
     
