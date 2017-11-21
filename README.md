@@ -20,7 +20,7 @@ We assume that a [bibigrid](https://github.com/BiBiServ/bibigrid) cluster ( mast
 [BioContainers](http://biocontainers.pro) is an open source container framework for bioinformatic software. We search BioContainers registry for a suitable Kraken container and write a small shell script that downloads the container once on each compute host. We can use the GE to distribute the jobs on the
 cluster. The `-pe` option ensures, that we call the script only  **once on each host**.
 
-	qsub -cwd -t 1-4 -pe multislot 16 -b y docker pull quay.io/biocontainers/kraken:1.0--pl5.22.0_0
+	qsub -t 1-4 -pe multislot 16 -b y docker pull quay.io/biocontainers/kraken:1.0--pl5.22.0_0
 	
 *This step seems to be unneccessary, because docker pulls a container if it isn't locally available. However, separate this step from rest of pipeline can speed up a analysis in the case you run more than one job in parallel on one host.*
 
@@ -38,7 +38,7 @@ the hosts. For usage with Kraken the database must decompressed before usage. Bo
 
 We again use the GridEngine to distribute the script on all slave hosts.
 
-	qsub -cwd -t 1-4 -pe multislot 16 kraken_download_db.sh
+	qsub -t 1-4 -pe multislot 16 kraken_download_db.sh
 
 
 ### Run Kraken Analysis
@@ -60,7 +60,7 @@ For the kraken analysis we have use a shell script `kraken_pipline.sh` that shou
 SEQ_FILES=$(curl -s https://openstack.cebitec.uni-bielefeld.de:8080/swift/v1/eMed/ | grep tar.bz2 )
 for SF in ${SEQ_FILES}; do 
 	SRS_NR=$(echo $SF | cut -f 2 -d '/' | cut -f 1 -d '.' ); 
-	qsub -cwd -pe multislot 16 kraken_pipeline.sh $SF $SRS_NR.report ; 
+	qsub -pe multislot 16 kraken_pipeline.sh $SF $SRS_NR.report ; 
 done 	
 
     
