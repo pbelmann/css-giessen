@@ -8,7 +8,7 @@ Please fetch this repository with
 
 ~~~BASH
 cd ~/
-git clone https://github.com/pbelmann/eMed.git
+git clone https://github.com/pbelmann/kraken-demo.git
 ~~~
    	
 *Hint: The cloud users homedir* ***is not shared*** *between master and host. Any outputs from GE jobs are stored in users homedir as default. It is often a good idea to change this default behavior. We could change the environment setting of the GridEngine or just use the -cwd (Currrent Working Directory) argument and change into a shared fs before*
@@ -42,7 +42,7 @@ the hosts. For usage with Kraken the database must decompressed before usage. Bo
 We again use the GridEngine to distribute the script on all slave hosts.
 
 ~~~BASH
-cd ~/eMed
+cd ~/kraken-demo
 qsub -t 1-4 -pe multislot 16 kraken_download_db.sh
 ~~~
 
@@ -63,7 +63,7 @@ For the kraken analysis we have to use a shell script `kraken_pipline.sh` that s
 3. Create Kraken report.
 
 ~~~BASH
-cd ~/eMed
+cd ~/kraken-demo
 SEQ_FILES=$(curl -s https://openstack.cebitec.uni-bielefeld.de:8080/swift/v1/eMed/ | grep tar.bz2 )
 for SF in ${SEQ_FILES}; do 
 	SRS_NR=$(echo $SF | cut -f 2 -d '/' | cut -f 1 -d '.' ); 
@@ -81,7 +81,7 @@ We now use [Krona](https://github.com/marbl/Krona/wiki) to get a nice visualitat
 
 ### Build Krona container
 
-	cd ~/eMed
+	cd ~/kraken-demo
 	docker build -t krona .
 
 ### Merge all report files
