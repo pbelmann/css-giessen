@@ -99,7 +99,7 @@ Since all reports files located on a shared filesystem, Krona can be run directl
 
 ![krona](figures/krona_result.png)
 
-     mv krona.html* /var/www
+     sudo mv /vol/spool/kraken/krona.html* /var/www
     
 You can use your browser to look at the Krona output.
 
