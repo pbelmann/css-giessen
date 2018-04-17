@@ -1,4 +1,4 @@
-# eMed Docker-Kraken Demo
+# Docker-Kraken Demo
 
 We want to use [Kraken](https://ccb.jhu.edu/software/kraken/) to analyze some FASTQ files from the [Human Microbiome Project](http://hmpdacc.org) and use [Krona](https://github.com/marbl/Krona/wiki) to visualize the results. To makes the life easier we run ready-to-use dockerized versions of Kraken and Krona.
 
@@ -88,7 +88,7 @@ We now use [Krona](https://github.com/marbl/Krona/wiki) to get a nice visualitat
 Since all reports files located on a shared filesystem, Krona can be run directly on the master. We have to merge all kraken-reports ...
 
     cd /vol/spool/kraken
-    for i in *.report; do cut -f2,3 $i > $i.krona; done
+    for i in *.report.out; do cut -f2,3 $i > $i.krona; done
     
 ### Run krona  
     
